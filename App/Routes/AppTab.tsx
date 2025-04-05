@@ -6,7 +6,7 @@ import {
   createBottomTabNavigator,
 } from '@react-navigation/bottom-tabs';
 import Home from '@Components/Home/Home';
-import Search from '@Components/Search/Search';
+import OfficeMap from '@Components/OfficeMap/OfficeMap';
 import Users from '@Components/User/User';
 import SettingsStack from '@Routes/SettingsStack';
 import { AppImages } from '@Theme';
@@ -16,9 +16,9 @@ const Tab = createBottomTabNavigator();
 
 enum tabs {
   HomeTab = 'Home',
-  SearchTab = 'Search',
-  UsersTab = 'Users',
-  SettingsTab = 'Settings',
+  OfficeMap = 'OfficeMap',
+  Project= 'Project',
+  Profile = 'Profile',
 }
 
 const TABS = [
@@ -29,20 +29,20 @@ const TABS = [
     name: 'home',
   },
   {
-    title: tabs.SearchTab,
-    icon: AppImages.search,
-    screen: Search,
-    name: 'search',
+    title: tabs.OfficeMap,
+    icon: AppImages.office_map,
+    screen: OfficeMap,
+    name: 'officeMap',
   },
   {
-    title: tabs.UsersTab,
-    icon: AppImages.user,
+    title: tabs.Project,
+    icon: AppImages.project,
     screen: Users,
     name: 'user',
   },
   {
-    title: tabs.SettingsTab,
-    icon: AppImages.settings,
+    title: tabs.Profile,
+    icon: AppImages.user,
     screen: SettingsStack,
     name: 'setting',
   },
@@ -55,6 +55,7 @@ const AppTab = () => {
       screenOptions={{
         tabBarHideOnKeyboard: true,
         headerShown: false,
+        tabBarShowLabel: false,
         tabBarInactiveTintColor: appTheme.gray,
         tabBarStyle: {
           backgroundColor: appTheme.tab,
