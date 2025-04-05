@@ -1,11 +1,11 @@
 /* eslint-disable no-useless-escape */
-import {Linking} from 'react-native';
+import { Linking } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
-import {AxiosHeaders} from 'axios';
-import {CommonActions} from '@react-navigation/native';
-import {ApiConfig} from '@ApiConfig';
-import {getItemFromStorage, removeStoreItem, Authentication} from '@Utils';
-import {Route} from '@Routes/AppRoutes';
+import { AxiosHeaders } from 'axios';
+import { CommonActions } from '@react-navigation/native';
+import { ApiConfig } from '@ApiConfig';
+import { getItemFromStorage, removeStoreItem, Authentication } from '@Utils';
+import { Route } from '@Routes/AppRoutes';
 
 export const isValidPhoneNo = (phoneNo: string) => {
   const phoneNumberPattern = /^\(?(\d{3})\)?[- ]?(\d{3})[- ]?(\d{4})$/;
@@ -76,14 +76,14 @@ export const getRound = (size: number) => {
 
 export const navigateToNextScreen = (
   navigation: any,
-  params: {name: string; params?: any},
+  params: { name: string; params?: any },
 ) => navigation.navigate(params);
 
 export const goToNextScreen = async (navigation: any, nextScreen: string) => {
   navigation.dispatch(
     CommonActions.reset({
       index: 0,
-      routes: [{name: nextScreen}],
+      routes: [{ name: nextScreen }],
     }),
   );
 };
@@ -103,7 +103,6 @@ export const getHeaders = () => {
 
 export const onLogout = (navigation: any) => {
   goToNextScreen(navigation, Route.LoginScreen);
-  // store.dispatch(userLogout());
   removeStoreItem(Authentication.TOKEN);
 };
 

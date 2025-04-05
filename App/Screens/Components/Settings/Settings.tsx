@@ -74,17 +74,7 @@ const Settings = () => {
         onPress={onValueChange}
         value={darkMode}
       />
-      <SettingHeader title={i18n.t('LANGUAGE')} />
-      {LANGUAGES.map(obj => {
-        return (
-          <SettingRow
-            {...obj}
-            onPress={onSelectLanguage}
-            isSelected={i18n.resolvedLanguage === obj.value}
-            key={obj.value}
-          />
-        );
-      })}
+
       <SettingRow
         title={i18n.t('LOG_OUT')}
         onPress={logout}

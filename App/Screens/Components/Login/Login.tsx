@@ -7,6 +7,7 @@ import {
   Pressable,
   Image,
   Button,
+  Alert,
 } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import { useNavigation } from '@react-navigation/native';
@@ -135,8 +136,6 @@ const Login = () => {
         password,
       );
       const user = userCredential.user;
-      console.log('user', user);
-
       // Store the user's authentication token
       const token = await user.getIdToken();
       console.log('token', token);
@@ -144,10 +143,9 @@ const Login = () => {
       if (token) {
         await setItemInStorage(Authentication.TOKEN, token);
         goToNextScreen(navigation, Route.HomeScreen);
-      } else {
-        throw new Error('Login failed');
       }
     } catch (error) {
+      Alert.alert('Invalid email or password');
     } finally {
       setState(prev => ({ ...prev, isProcessing: false }));
     }

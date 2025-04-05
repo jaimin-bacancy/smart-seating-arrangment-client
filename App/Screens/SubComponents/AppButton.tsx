@@ -86,18 +86,11 @@ const ButtonComponent = (props: GradientButtonProps) => {
           CommonStyle.overFlowHidden,
           style,
         ]}>
-        {((!isProcessing || textOnly) && (
-          <CustomText
-            large
-            style={[{ color: textColor ?? appTheme.tint }, marginHorizontal]}>
-            {title}
-          </CustomText>
-        )) || (
-          <ActivityIndicator
-            color={appTheme.background}
-            style={marginHorizontal}
-          />
-        )}
+        <CustomText
+          large
+          style={[{ color: textColor ?? appTheme.tint }, marginHorizontal]}>
+          {title}
+        </CustomText>
       </LinearGradient>
     </Pressable>
   );
