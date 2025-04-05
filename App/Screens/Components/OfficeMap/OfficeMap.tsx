@@ -1,18 +1,57 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  SafeAreaView,
-  ScrollView,
-  TouchableOpacity,
-} from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Pressable } from 'react-native';
 import {
   BottomModalContainer,
   CustomText,
   FloorPicker,
+  Layout,
   TeamView,
 } from '@CommonComponent';
+import { ScrollView } from 'react-native-gesture-handler';
+import { useAppContext } from '@AppContext';
+
+const rooms = [
+  {
+    id: 1,
+    room: '1501',
+    seats: 72,
+  },
+  {
+    id: 2,
+    room: '1502',
+    seats: 72,
+  },
+  {
+    id: 3,
+    room: '1503',
+    seats: 72,
+  },
+  {
+    id: 4,
+    room: '1504',
+    seats: 72,
+  },
+  {
+    id: 5,
+    room: '1601',
+    seats: 72,
+  },
+  {
+    id: 6,
+    room: '1602',
+    seats: 72,
+  },
+  {
+    id: 8,
+    room: '1603',
+    seats: 72,
+  },
+  {
+    id: 7,
+    room: '1604',
+    seats: 72,
+  },
+];
 
 const TOTAL_SEATS = 72;
 const SEATS_PER_DESK = 12; // 6 + 6
@@ -38,45 +77,78 @@ const generateDesks = () => {
 };
 
 export default function App() {
+  const { appTheme } = useAppContext();
   const desks = generateDesks();
   const [isShowModal, setShowModal] = useState(false);
   const [selectedSeat, setSelectedSeat] = useState(null);
-  const [selectedFloor, setSelectedFloor] = useState('Floor 2');
+  const [selectedFloorId, setSelectedFloorId] = useState(3);
 
-  const handleSeatPress = (seat) => {
+  const handleSeatPress = seat => {
     setSelectedSeat(seat);
     setShowModal(true);
   };
 
-  const RenderLayout = (desk) => {
+  const RenderLayout = () => {
     return desks.map((desk, index) => (
       <View key={index} style={styles.deskBlock}>
         <View style={styles.row}>
-          {desk.topRow.map((seat) => (
+          {desk.topRow.map(seat => (
             <TouchableOpacity
               key={seat.id}
               style={[
                 styles.seat,
-                seat.available ? styles.seatAvailable : styles.seatOccupied,
+                {
+                  backgroundColor: seat.available
+                    ? appTheme.card
+                    : appTheme.themeColor,
+                },
               ]}
               onPress={() => handleSeatPress(seat)}>
-              <CustomText style={styles.seatLabel}>{seat.id}</CustomText>
+              <CustomText
+                style={[
+                  styles.seatLabel,
+                  {
+                    color: seat.available ? appTheme.text : appTheme.background,
+                  },
+                ]}>
+                {seat.id}
+              </CustomText>
             </TouchableOpacity>
           ))}
         </View>
-
-        <View style={styles.divider} />
-
+        <View
+          style={[
+            styles.divider,
+            {
+              backgroundColor: appTheme.textBorder,
+              borderColor: appTheme.gray,
+            },
+          ]}
+        />
         <View style={styles.row}>
-          {desk.bottomRow.map((seat) => (
+          {desk.bottomRow.map(seat => (
             <TouchableOpacity
               key={seat.id}
               style={[
                 styles.seat,
-                seat.available ? styles.seatAvailable : styles.seatOccupied,
+                {
+                  backgroundColor: seat.available
+                    ? appTheme.border
+                    : appTheme.themeColor,
+                },
               ]}
               onPress={() => handleSeatPress(seat)}>
-              <CustomText style={styles.seatLabel}>{seat.id}</CustomText>
+              <CustomText
+                style={[
+                  styles.seatLabel,
+                  {
+                    color: seat.available
+                      ? appTheme.lightText
+                      : appTheme.background,
+                  },
+                ]}>
+                {seat.id}
+              </CustomText>
             </TouchableOpacity>
           ))}
         </View>
@@ -87,36 +159,63 @@ export default function App() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <CustomText style={styles.title}>SEATING MAP</CustomText>
+    <Layout padding={20} scrollable>
+      <View style={{ gap: 10 }}>
+        <CustomText
+          style={{ textAlign: 'center', color: appTheme.themeColor }}
+          large>
+          Select Floor
+        </CustomText>
+        <View style={[styles.floorPickerContainer]}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            {rooms.map(room => (
+              <Pressable
+                onPress={() => setSelectedFloorId(room.id)}
+                key={room.id}
+                style={{
+                  borderWidth: selectedFloorId === room.id ? 1 : 0.5,
+                  borderColor:
+                    selectedFloorId === room.id
+                      ? appTheme.themeColor
+                      : appTheme.gray,
+                  backgroundColor:
+                    selectedFloorId === room.id
+                      ? appTheme.themeColor
+                      : appTheme.card,
 
-      <ScrollView
-        keyboardShouldPersistTaps="never"
-        contentContainerStyle={styles.scrollArea}>
-
-        <View style={styles.floorPickerContainer}>
-          <CustomText style={styles.floorPickerText}>Select Floor</CustomText>
-          <FloorPicker
-            selectedFloor={selectedFloor}
-            onChangeFloor={(val) => {
-              console.log('Selected Floor:', val);
-              setSelectedFloor(val);
-            }}
-          />
+                  paddingVertical: 5,
+                  borderRadius: 5,
+                  paddingHorizontal: 10,
+                  marginHorizontal: 5,
+                }}>
+                <CustomText
+                  small
+                  style={{
+                    color:
+                      selectedFloorId === room.id
+                        ? appTheme.background
+                        : appTheme.text,
+                    fontWeight: selectedFloorId === room.id ? 'bold' : 'normal',
+                  }}>
+                  {room.room}
+                </CustomText>
+              </Pressable>
+            ))}
+          </ScrollView>
         </View>
+      </View>
 
-        <View style={styles.mapContainer}>
-          <RenderLayout desks={desks} />
-        </View>
+      <View style={{ height: 10 }} />
 
-        <TeamView
-          onClusterPress={() => {
-            console.log('AI-Optimized Clusters Pressed');
-          }}
-        />
+      <View style={[styles.mapContainer, { backgroundColor: appTheme.card }]}>
+        <RenderLayout desks={desks} />
+      </View>
 
-        <View style={styles.bottomSpacing} />
-      </ScrollView>
+      <TeamView
+        onClusterPress={() => {
+          console.log('AI-Optimized Clusters Pressed');
+        }}
+      />
 
       <BottomModalContainer
         title={`Seat #${selectedSeat?.id}`}
@@ -127,14 +226,13 @@ export default function App() {
         </CustomText>
         <View style={styles.modalSpacing} />
       </BottomModalContainer>
-    </SafeAreaView>
+    </Layout>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
     paddingTop: 50,
     alignItems: 'center',
   },
@@ -145,19 +243,19 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   floorPickerText: {
-    color: '#000',
     fontSize: 16,
-    textAlign: 'center',
   },
   scrollArea: {
     paddingBottom: 100,
     alignItems: 'center',
   },
   deskBlock: {
-    marginBottom: 20,
+    margin: 10,
+    width: '100%',
   },
   row: {
     flexDirection: 'row',
+    justifyContent: 'space-evenly',
   },
   seat: {
     width: 40,
@@ -178,10 +276,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   divider: {
-    height: 2,
-    backgroundColor: 'orange',
+    // height: 2,
     marginVertical: 6,
     borderRadius: 2,
+    borderStyle: 'dashed',
+
+    borderWidth: 0.5,
   },
   passage: {
     height: 10,
@@ -190,18 +290,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f2f2f2',
-    padding: 20,
-    borderRadius: 20,
-    width: '90%',
+    borderRadius: 10,
     marginBottom: 10,
   },
   mapContainer: {
     alignItems: 'center',
-    backgroundColor: '#f2f2f2',
-    padding: 20,
     borderRadius: 20,
-    width: '90%',
+    padding: 10,
   },
   bottomSpacing: {
     height: 100,

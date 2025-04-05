@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { useAppContext } from '@AppContext';
 
 type Team = {
   name: string;
@@ -14,13 +15,10 @@ const teams: Team[] = [
   { name: 'Finance', color: '#4DB6AC' },
 ];
 
-const TeamView = ({
-  onClusterPress,
-}: {
-  onClusterPress?: () => void;
-}) => {
+const TeamView = ({ onClusterPress }: { onClusterPress?: () => void }) => {
+  const { appTheme } = useAppContext();
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: appTheme.card }]}>
       <Text style={styles.header}>Teams</Text>
 
       <View style={styles.legendWrapper}>
@@ -45,14 +43,13 @@ const TeamView = ({
   );
 };
 
-export {TeamView};
+export { TeamView };
 
 const styles = StyleSheet.create({
   container: {
     padding: 16,
     borderRadius: 16,
-    backgroundColor: '#f2f2f2',
-    margin: 16,
+    marginVertical: 10,
     elevation: 4,
   },
   header: {
