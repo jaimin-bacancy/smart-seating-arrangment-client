@@ -1,6 +1,8 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from 'react';
 import { Image, RefreshControl, StyleSheet, View } from 'react-native';
+import firestore from '@react-native-firebase/firestore';
+
 import {
   CustomText,
   Layout,
@@ -13,12 +15,24 @@ import { ButtonComponent } from '@SubComponents';
 import { useAppContext } from '@AppContext';
 import auth from '@react-native-firebase/auth';
 import { AppImages, CommonStyle } from '@Theme';
+import { useCollection } from '../../../Hooks/useCollection';
+import { User } from '../../../Interfaces/interface';
 
 const Home = () => {
   const { appTheme } = useAppContext();
-  const user = auth().currentUser;
-  console.log('user', JSON.stringify(user));
   const isFocused = useIsFocused();
+
+  const {
+    data: user,
+    isLoading,
+    error,
+  }: { data: User; isLoading: boolean; error: any } = useCollection('users');
+
+  const {
+    data: seat,
+    isLoading: seatLoading,
+    error: seatError,
+  } = useCollection('seats');
 
   return (
     <Layout padding={20} scrollable>
@@ -57,7 +71,7 @@ const Home = () => {
                 color: appTheme.lightText,
                 fontSize: 14,
               }}>
-              Senior Developer
+              {user?.role}
             </CustomText>
           </View>
         </View>
@@ -126,13 +140,13 @@ const Home = () => {
                 marginBottom: 4,
                 color: appTheme.text,
               }}>
-              B12
+              Not allocated
             </CustomText>
             <CustomText
               style={{
                 color: appTheme.lightText,
               }}>
-              2nd Floor, Engineering Zone
+              2nd Floor, {user?.department}-Zone
             </CustomText>
           </View>
         </View>
