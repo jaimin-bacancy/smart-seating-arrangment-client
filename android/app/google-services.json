@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "775435955084",
+    "firebase_url": "https://smart-seating-app-7a1b6-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "smart-seating-app-7a1b6",
+    "storage_bucket": "smart-seating-app-7a1b6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:775435955084:android:1b08751273c3f9bb24c4a9",
+        "android_client_info": {
+          "package_name": "com.smartseatingarrangmentclientapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCG-bjyIrDWclKMkGKhQmc9nBt2eadNp3I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
