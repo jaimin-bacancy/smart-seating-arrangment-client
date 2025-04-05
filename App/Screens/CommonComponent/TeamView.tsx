@@ -19,26 +19,18 @@ const TeamView = ({ onClusterPress }: { onClusterPress?: () => void }) => {
   const { appTheme } = useAppContext();
   return (
     <View style={[styles.container, { backgroundColor: appTheme.card }]}>
-      <Text style={styles.header}>Teams</Text>
+      <Text style={[styles.header, { color: appTheme.text }]}>Teams</Text>
 
       <View style={styles.legendWrapper}>
         {teams.map((team, index) => (
           <View key={index} style={styles.legendRow}>
             <View style={[styles.dot, { backgroundColor: team.color }]} />
-            <Text style={styles.label}>{team.name}</Text>
+            <Text style={[styles.label, { color: appTheme.text }]}>
+              {team.name}
+            </Text>
           </View>
         ))}
       </View>
-
-      <TouchableOpacity
-        style={styles.clusterButton}
-        onPress={onClusterPress}
-        activeOpacity={0.8}>
-        <View style={styles.aiBadge}>
-          <Text style={styles.aiText}>AI</Text>
-        </View>
-        <Text style={styles.buttonText}>Show AI-Optimized Clusters</Text>
-      </TouchableOpacity>
     </View>
   );
 };
@@ -77,33 +69,5 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    color: '#333',
-  },
-  clusterButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#6C63FF',
-    borderRadius: 30,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    backgroundColor: '#EEF1FF',
-  },
-  aiBadge: {
-    backgroundColor: '#6C63FF',
-    borderRadius: 20,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    marginRight: 8,
-  },
-  aiText: {
-    color: '#fff',
-    fontWeight: '600',
-    fontSize: 12,
-  },
-  buttonText: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#6C63FF',
   },
 });
