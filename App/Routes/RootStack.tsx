@@ -14,7 +14,7 @@ const RootStack = () => {
 
   const isUserLogin = () => {
     const isUserLoggedIn = isLoggedIn();
-    if (!isUserLoggedIn) {
+    if (isUserLoggedIn) {
       return Route.LoginScreen;
     }
     return Route.HomeScreen;
