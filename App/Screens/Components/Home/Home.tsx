@@ -174,8 +174,26 @@ const Home = () => {
             marginBottom: 16,
           }}>
           <CustomText style={{ color: appTheme.themeColor }}>
-            Frontend
+            React Native
           </CustomText>
+        </View>
+
+        <View style={{ marginBottom: 30, gap: 10 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <CustomText style={{ color: appTheme.text }}>PM: </CustomText>
+            <CustomText
+              style={{ color: appTheme.themeColor, fontWeight: '500' }}>
+              Karmaraj Vaghela
+            </CustomText>
+          </View>
+
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <CustomText style={{ color: appTheme.text }}>DOE: </CustomText>
+            <CustomText
+              style={{ color: appTheme.themeColor, fontWeight: '500' }}>
+              Vroksi Roy
+            </CustomText>
+          </View>
         </View>
 
         <CustomText
@@ -206,6 +224,57 @@ const Home = () => {
           ))}
           <CustomText style={{ color: appTheme.lightText }}>+3 more</CustomText>
         </View>
+
+        {/* 
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-around',
+            marginTop: 20,
+            alignItems: 'center',
+          }}>
+          <View
+            style={{
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+            <CustomText style={{ color: appTheme.text }}>
+              PROJECT MANAGER
+            </CustomText>
+            <View
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: 16,
+                backgroundColor: appTheme.themeColor,
+                justifyContent: 'center',
+                alignItems: 'center',
+                margin: 10,
+              }}>
+              <CustomText style={{ color: '#FFFFFF', fontSize: 12 }}>
+                HP
+              </CustomText>
+            </View>
+          </View>
+
+          <View style={{ alignItems: 'center' }}>
+            <CustomText style={{ color: appTheme.text }}>DOE</CustomText>
+            <View
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: 16,
+                backgroundColor: appTheme.themeColor,
+                justifyContent: 'center',
+                alignItems: 'center',
+                margin: 10,
+              }}>
+              <CustomText style={{ color: '#FFFFFF', fontSize: 12 }}>
+                JP
+              </CustomText>
+            </View>
+          </View>
+        </View> */}
       </View>
       {/* AI-Optimized Seat Section */}
       <View
