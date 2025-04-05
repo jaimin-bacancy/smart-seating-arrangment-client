@@ -8,17 +8,20 @@ import {
   Image,
   Button,
 } from 'react-native';
+import auth from '@react-native-firebase/auth';
 import { useNavigation } from '@react-navigation/native';
 import { AppImages } from '@Theme';
 import { Authentication, goToNextScreen, setItemInStorage } from '@Utils';
 import { BottomView, ButtonComponent } from '@SubComponents';
 import { CustomText, Layout } from '@CommonComponent';
 import { Route } from '@Routes/AppRoutes';
+import { useAppContext } from '@AppContext';
 
 const EMAIL_REGEX = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
 const PASSWORD_REGEX = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
 
 const Login = () => {
+  const { appTheme } = useAppContext();
   const navigation = useNavigation();
   const [state, setState] = useState({
     email: '',
@@ -126,12 +129,25 @@ const Login = () => {
         return;
       }
 
-      // Make API call here
-      await setItemInStorage(Authentication.TOKEN, 'set login token');
-      goToNextScreen(navigation, Route.HomeScreen);
+      // Firebase authentication
+      const userCredential = await auth().signInWithEmailAndPassword(
+        email,
+        password,
+      );
+      const user = userCredential.user;
+      console.log('user', user);
+
+      // Store the user's authentication token
+      const token = await user.getIdToken();
+      console.log('token', token);
+
+      if (token) {
+        await setItemInStorage(Authentication.TOKEN, token);
+        goToNextScreen(navigation, Route.HomeScreen);
+      } else {
+        throw new Error('Login failed');
+      }
     } catch (error) {
-      // Handle error here
-      console.error(error);
     } finally {
       setState(prev => ({ ...prev, isProcessing: false }));
     }
@@ -141,10 +157,10 @@ const Login = () => {
     <SafeAreaView style={styles.container}>
       <View style={styles.contentContainer}>
         <View style={styles.logoContainer}>
-          <View style={styles.logo}>
-            <CustomText style={styles.logoText}>SO</CustomText>
+          <View style={[styles.logo, { backgroundColor: appTheme.themeColor }]}>
+            <CustomText style={styles.logoText}>b</CustomText>
           </View>
-          <CustomText style={styles.title}>Smart Office</CustomText>
+          <CustomText style={styles.title}>Bacancy</CustomText>
           <CustomText style={styles.subtitle}>
             Sign in to your workspace
           </CustomText>
@@ -208,7 +224,10 @@ const Login = () => {
             <CustomText style={styles.checkboxText}>Remember me</CustomText>
           </Pressable>
           <Pressable>
-            <CustomText style={styles.forgotText}>Forgot?</CustomText>
+            <CustomText
+              style={[styles.forgotText, { color: appTheme.themeColor }]}>
+              Forgot?
+            </CustomText>
           </Pressable>
         </View>
 
@@ -251,13 +270,13 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#6C63FF',
+
     justifyContent: 'center',
     alignItems: 'center',
   },
   logoText: {
     color: '#fff',
-    fontSize: 24,
+    fontSize: 34,
     fontWeight: 'bold',
   },
   title: {
@@ -312,11 +331,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   forgotText: {
-    color: '#6C63FF',
     fontSize: 14,
   },
   signInButton: {
-    backgroundColor: '#6C63FF',
     borderRadius: 12,
     alignItems: 'center',
     width: '100%',

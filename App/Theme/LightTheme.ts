@@ -4,6 +4,7 @@ const LightTheme = {
   type: 'light',
   keyboardAppearance: 'light',
   themeColor: ThemeColor.primary,
+  themeColor1: ThemeColor.primary1,
   background: ThemeColor.white,
   shadowColor: ThemeColor.black,
   card: ThemeColor.lighter,

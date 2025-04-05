@@ -93,7 +93,10 @@ const ButtonComponent = (props: GradientButtonProps) => {
             {title}
           </CustomText>
         )) || (
-          <ActivityIndicator color={appTheme.tint} style={marginHorizontal} />
+          <ActivityIndicator
+            color={appTheme.background}
+            style={marginHorizontal}
+          />
         )}
       </LinearGradient>
     </Pressable>

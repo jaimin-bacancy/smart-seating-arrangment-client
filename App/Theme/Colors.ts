@@ -1,5 +1,6 @@
 const ThemeColor = {
-  primary: '#6C63FF',
+  primary: '#FF7900',
+  primary1: 'rgba(255, 121, 0, 0.1)',
   lightText: '#718096',
   mediumText: '#4A5568',
   darkText: '#1A202C',

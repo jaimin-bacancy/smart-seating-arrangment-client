@@ -19,6 +19,7 @@ import { CommonStyle } from '@Theme';
 
 interface LayoutProps {
   title?: string;
+  isNav?: boolean;
   titleCenter?: boolean;
   titleTextStyle?: StyleProp<TextStyle>;
   titleNumberOfLines?: number;
@@ -50,6 +51,7 @@ const Layout = (props: React.PropsWithChildren<LayoutProps>) => {
   const {
     children,
     title,
+    isNav = false,
     titleCenter,
     titleTextStyle,
     titleNumberOfLines = 1,
@@ -80,18 +82,20 @@ const Layout = (props: React.PropsWithChildren<LayoutProps>) => {
         behavior="padding"
         style={styles.keyboardView}
         keyboardVerticalOffset={isIOS ? 0 : -500}>
-        <NavigationBar
-          title={title}
-          titleCenter={titleCenter}
-          titleTextStyle={titleTextStyle}
-          titleNumberOfLines={titleNumberOfLines}
-          titleMaxLength={titleMaxLength}
-          backgroundColor={backgroundColor}
-          showBack={showBack}
-          exStyle={navBarContainerStyle}
-          paddingHorizontal={padding}
-          submit={submit}
-        />
+        {isNav && (
+          <NavigationBar
+            title={title}
+            titleCenter={titleCenter}
+            titleTextStyle={titleTextStyle}
+            titleNumberOfLines={titleNumberOfLines}
+            titleMaxLength={titleMaxLength}
+            backgroundColor={backgroundColor}
+            showBack={showBack}
+            exStyle={navBarContainerStyle}
+            paddingHorizontal={padding}
+            submit={submit}
+          />
+        )}
         {(scrollable && (
           <ScrollView
             showsVerticalScrollIndicator={false}
