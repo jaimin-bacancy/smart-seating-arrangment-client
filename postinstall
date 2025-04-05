@@ -1,0 +1,6 @@
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    pod install --project-directory=ios
+fi
+
+node ./moduleResolver.js
+node ./env.config/env.config.js
