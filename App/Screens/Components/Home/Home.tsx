@@ -41,7 +41,7 @@ const Home = () => {
               alignItems: 'center',
               marginRight: 12,
             }}>
-            <CustomText style={{ color: appTheme.background }}>b</CustomText>
+            <CustomText style={{ color: '#FFFFFF' }}>b</CustomText>
           </View>
           <View>
             <CustomText
@@ -231,7 +231,7 @@ const Home = () => {
               justifyContent: 'center',
               alignItems: 'center',
             }}>
-            <CustomText style={{ color: appTheme.background }}>AI</CustomText>
+            <CustomText style={{ color: '#FFFFFF' }}>AI</CustomText>
           </View>
           <CustomText
             style={{
