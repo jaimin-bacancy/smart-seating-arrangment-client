@@ -9,9 +9,14 @@ import {
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {AppImages, CommonStyle} from '@Theme';
-import {Authentication, goToNextScreen, setItemInStorage} from '@Utils';
+import {
+  Authentication,
+  getSize,
+  goToNextScreen,
+  setItemInStorage,
+} from '@Utils';
 import {BottomView, ButtonComponent} from '@SubComponents';
-import {CustomText} from '@CommonComponent';
+import {CustomText, Layout} from '@CommonComponent';
 import {Route} from '@Routes/AppRoutes';
 import {useAppContext} from '@AppContext';
 import {I18n} from '@Localization';
@@ -24,8 +29,8 @@ const styles = StyleSheet.create({
     marginTop: 130,
   },
   title: {
-    marginVertical: 20,
     textAlign: 'center',
+    fontWeight: 'bold',
   },
   btnText: {
     textAlign: 'right',
@@ -106,80 +111,24 @@ const Login = () => {
   };
 
   return (
-    <SafeAreaView
-      style={[flexContainer, {backgroundColor: appTheme.background}]}>
-      <View style={[flexContainer, center]}>
-        <View style={outer}>
-          <CustomText xxlarge style={[title, {color: appTheme.text}]}>
-            {I18n.t('SIGN_IN')}
-          </CustomText>
-          <TextInput
-            onChangeText={(text: string) => onChangeText(text, 'email')}
-            value={email}
-            autoCapitalize="none"
-            placeholder="Email"
-            style={inputStyle}
-            placeholderTextColor={appTheme.lightText}
-            underlineColorAndroid={appTheme.transparent}
-            keyboardType="email-address"
-            returnKeyType="next"
-            ref={refEmail}
-            onSubmitEditing={() => onSubmitEditing('refPassword')}
-          />
-          <View style={flexDirection}>
-            <TextInput
-              onChangeText={(text: string) => onChangeText(text, 'password')}
-              value={password}
-              autoCapitalize="none"
-              placeholder="Password"
-              style={[inputStyle, flex]}
-              placeholderTextColor={appTheme.lightText}
-              underlineColorAndroid={appTheme.transparent}
-              secureTextEntry={isSecureTextEntry}
-              returnKeyType="done"
-              ref={refPassword}
-              onSubmitEditing={onLogin}
-            />
-            <Pressable
-              onPress={onShowPassword}
-              android_ripple={CommonStyle.androidRipple}>
-              <View
-                style={{
-                  ...center,
-                  ...inputIcon,
-                  borderBottomColor: appTheme.border,
-                }}>
-                <Image
-                  resizeMode="contain"
-                  source={{
-                    uri:
-                      (isSecureTextEntry && AppImages.passwordOpen) ||
-                      AppImages.passwordClosed,
-                  }}
-                  style={inputImg}
-                />
-              </View>
-            </Pressable>
-          </View>
-          <CustomText style={[btnText, {color: appTheme.lightText}]}>
-            Forgot Password?
-          </CustomText>
-          <ButtonComponent
-            title="Log in"
-            isProcessing={isProcessing}
-            isGradient
-            onPress={onLogin}
-            style={marginTop}
-            borderRadius={28}
-          />
-          <BottomView
-            title="Need to create an account?"
-            subTitle="Sign up here"
-            onSubTitle={() => console.log('go to signup')}
-          />
-        </View>
+    <Layout
+      backgroundColor={appTheme.background}
+      navBarContainerStyle={{borderWidth: 1}}>
+      <View
+        style={[
+          {
+            borderWidth: 1,
+            justifyContent: 'center',
+            borderRadius: 50,
+            backgroundColor: appTheme.themeColor,
+          },
+          getSize(100),
+        ]}>
+        <CustomText xxxlarge style={[title, {color: appTheme.background}]}>
+          HP
+        </CustomText>
       </View>
-    </SafeAreaView>
+    </Layout>
   );
 };
 

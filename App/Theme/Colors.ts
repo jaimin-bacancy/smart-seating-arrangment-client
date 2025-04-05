@@ -1,5 +1,12 @@
 const ThemeColor = {
-  primary: '#1FA2FF',
+  primary: '#6C63FF',
+  lightText: '#718096',
+  mediumText: '#4A5568',
+  darkText: '#1A202C',
+  background: '#FFFFFF',
+  grayBackground: '#F8F9FC',
+  cardBackground: '#EDF2F7',
+
   white: '#FFF',
   lighter: '#F3F3F3',
   light: '#DAE1E7',
