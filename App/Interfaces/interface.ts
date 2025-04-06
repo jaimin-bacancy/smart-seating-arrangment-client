@@ -13,6 +13,7 @@ export interface User {
   techSkills: string[];
   currentProjects: FirestoreReference[];
   manager?: FirestoreReference;
+  assignedSeat?: FirestoreReference;
 }
 
 export interface OfficeLayout {

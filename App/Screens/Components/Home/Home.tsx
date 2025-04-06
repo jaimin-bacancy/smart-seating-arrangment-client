@@ -7,7 +7,7 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import firestore from '@react-native-firebase/firestore';
+import firestore, { getDoc } from '@react-native-firebase/firestore';
 
 import {
   CustomText,
@@ -21,13 +21,13 @@ import { ButtonComponent } from '@SubComponents';
 import { useAppContext } from '@AppContext';
 import { AppImages, CommonStyle } from '@Theme';
 import { useCollection } from '../../../Hooks/useCollection';
-import { Project, User } from '../../../Interfaces/interface';
-import { useGetDoc } from '../../../Hooks/useGetDoc';
+import { Project, Seat, User } from '../../../Interfaces/interface';
 
 const Home = () => {
   const { appTheme } = useAppContext();
   const isFocused = useIsFocused();
   const [projects, setProjects] = useState<Project[]>([]);
+  const [seatDetails, setSeatDetails] = useState<Seat | null>(null);
 
   const {
     data: user,
@@ -44,15 +44,7 @@ const Home = () => {
 
       try {
         const projectPromises = user.currentProjects.map(async projectId => {
-          const doc = await firestore()
-            .collection('projects')
-            .doc(projectId)
-            .get();
-
-          if (doc.exists) {
-            return { id: projectId, ...doc.data() } as Project;
-          }
-          return null;
+          return (await getDoc(projectId as any)).data();
         });
 
         const resolvedProjects = await Promise.all(projectPromises);
@@ -62,6 +54,18 @@ const Home = () => {
         setProjects([]);
       }
     };
+
+    const fetchSeatDetails = async () => {
+      const seatDetails = await getDoc(user?.assignedSeat as any);
+      setSeatDetails(seatDetails.data() as Seat);
+      console.log('seatDetails: ', JSON.stringify(seatDetails.data()));
+    };
+
+    console.log('user?.assignedSeat: ', user?.assignedSeat);
+
+    if (user?.assignedSeat) {
+      fetchSeatDetails();
+    }
 
     fetchProjects();
   }, [user?.currentProjects]);
@@ -220,7 +224,7 @@ const Home = () => {
                 {project.name}
               </CustomText>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
-                {user.techSkills.map((skill, index) => {
+                {project.techStack.map((skill, index) => {
                   return (
                     <View
                       key={index}
@@ -241,20 +245,10 @@ const Home = () => {
               </View>
               <View style={{ marginBottom: 30, gap: 10 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <CustomText style={{ color: appTheme.text }}>PM: </CustomText>
                   <CustomText
-                    style={{ color: appTheme.themeColor, fontWeight: '500' }}>
-                    Karmaraj Vaghela
-                  </CustomText>
-                </View>
-
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <CustomText style={{ color: appTheme.text }}>
-                    DOE:{' '}
-                  </CustomText>
-                  <CustomText
-                    style={{ color: appTheme.themeColor, fontWeight: '500' }}>
-                    Vroksi Roy
+                    style={{ color: appTheme.gray, fontWeight: '400' }}
+                    numberOfLines={3}>
+                    {project.description}
                   </CustomText>
                 </View>
               </View>
@@ -289,57 +283,6 @@ const Home = () => {
                   +3 more
                 </CustomText>
               </View>
-
-              {/* 
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-around',
-            marginTop: 20,
-            alignItems: 'center',
-          }}>
-          <View
-            style={{
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-            <CustomText style={{ color: appTheme.text }}>
-              PROJECT MANAGER
-            </CustomText>
-            <View
-              style={{
-                width: 32,
-                height: 32,
-                borderRadius: 16,
-                backgroundColor: appTheme.themeColor,
-                justifyContent: 'center',
-                alignItems: 'center',
-                margin: 10,
-              }}>
-              <CustomText style={{ color: '#FFFFFF', fontSize: 12 }}>
-                HP
-              </CustomText>
-            </View>
-          </View>
-
-          <View style={{ alignItems: 'center' }}>
-            <CustomText style={{ color: appTheme.text }}>DOE</CustomText>
-            <View
-              style={{
-                width: 32,
-                height: 32,
-                borderRadius: 16,
-                backgroundColor: appTheme.themeColor,
-                justifyContent: 'center',
-                alignItems: 'center',
-                margin: 10,
-              }}>
-              <CustomText style={{ color: '#FFFFFF', fontSize: 12 }}>
-                JP
-              </CustomText>
-            </View>
-          </View>
-        </View> */}
             </View>
           );
         })) || (

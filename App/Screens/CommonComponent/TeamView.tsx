@@ -7,16 +7,15 @@ type Team = {
   color: string;
 };
 
-const teams: Team[] = [
-  { name: 'Engineering', color: '#6C63FF' },
-  { name: 'Design', color: '#63C174' },
-  { name: 'Product', color: '#B28DFF' },
-  { name: 'Marketing', color: '#F4A261' },
-  { name: 'Finance', color: '#4DB6AC' },
-];
-
 const TeamView = ({ onClusterPress }: { onClusterPress?: () => void }) => {
   const { appTheme } = useAppContext();
+
+  const teams: Team[] = [
+    { name: 'Occupied', color: appTheme.themeColor },
+    { name: 'Available', color: appTheme.gray },
+    { name: 'Hybrid', color: '#B28DFF' },
+  ];
+
   return (
     <View style={[styles.container, { backgroundColor: appTheme.card }]}>
       <Text style={styles.header}>Teams</Text>
