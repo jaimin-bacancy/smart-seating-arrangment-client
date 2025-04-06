@@ -1,36 +1,46 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { useAppContext } from '@AppContext';
+import { CustomText } from './CustomText';
 
 type Team = {
   name: string;
   color: string;
 };
 
-const teams: Team[] = [
-  { name: 'Engineering', color: '#6C63FF' },
-  { name: 'Design', color: '#63C174' },
-  { name: 'Product', color: '#B28DFF' },
-  { name: 'Marketing', color: '#F4A261' },
-  { name: 'Finance', color: '#4DB6AC' },
-];
-
 const TeamView = ({ onClusterPress }: { onClusterPress?: () => void }) => {
   const { appTheme } = useAppContext();
+
+  const teams: Team[] = [
+    { name: 'Occupied', color: appTheme.themeColor },
+    { name: 'Available', color: appTheme.gray },
+    { name: 'Hybrid', color: '#B28DFF' },
+  ];
+
   return (
     <View style={[styles.container, { backgroundColor: appTheme.card }]}>
-      <Text style={[styles.header, { color: appTheme.text }]}>Teams</Text>
+      <CustomText style={styles.header}>Teams</CustomText>
 
       <View style={styles.legendWrapper}>
         {teams.map((team, index) => (
           <View key={index} style={styles.legendRow}>
             <View style={[styles.dot, { backgroundColor: team.color }]} />
-            <Text style={[styles.label, { color: appTheme.text }]}>
-              {team.name}
-            </Text>
+            <CustomText style={styles.label}>{team.name}</CustomText>
           </View>
         ))}
       </View>
+
+      <TouchableOpacity
+        style={styles.clusterButton}
+        onPress={onClusterPress}
+        activeOpacity={0.8}>
+        <View style={styles.aiBadge}>
+          <CustomText style={styles.aiText}>AI</CustomText>
+        </View>
+        <CustomText style={styles.buttonText}>
+          Show AI-Optimized Clusters
+        </CustomText>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -48,7 +58,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     marginBottom: 12,
-    color: '#000',
   },
   legendWrapper: {
     flexDirection: 'row',
@@ -67,7 +76,32 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     marginRight: 8,
   },
-  label: {
-    fontSize: 16,
+  label: {},
+  clusterButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#6C63FF',
+    borderRadius: 30,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    backgroundColor: '#EEF1FF',
+  },
+  aiBadge: {
+    backgroundColor: '#6C63FF',
+    borderRadius: 20,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    marginRight: 8,
+  },
+  aiText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 12,
+  },
+  buttonText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#6C63FF',
   },
 });

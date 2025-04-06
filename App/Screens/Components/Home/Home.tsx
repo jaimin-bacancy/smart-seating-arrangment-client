@@ -1,6 +1,15 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from 'react';
-import { Image, RefreshControl, StyleSheet, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Image,
+  Pressable,
+  RefreshControl,
+  StyleSheet,
+  View,
+} from 'react-native';
+import { getDoc } from '@react-native-firebase/firestore';
+
 import {
   CustomText,
   Layout,
@@ -11,14 +20,65 @@ import { useIsFocused } from '@react-navigation/native';
 import { ButtonComponent } from '@SubComponents';
 
 import { useAppContext } from '@AppContext';
-import auth from '@react-native-firebase/auth';
 import { AppImages, CommonStyle } from '@Theme';
+import { useCollection } from '../../../Hooks/useCollection';
+import { Project, Seat, User } from '../../../Interfaces/interface';
 
 const Home = () => {
   const { appTheme } = useAppContext();
-  const user = auth().currentUser;
-  console.log('user', JSON.stringify(user));
   const isFocused = useIsFocused();
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [seatDetails, setSeatDetails] = useState<Seat | null>(null);
+
+  console.log('seatDetails:00->  ', seatDetails);
+
+  const {
+    data: user,
+    isLoading,
+    error,
+  }: { data: User; isLoading: boolean; error: any } = useCollection('users');
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      if (!user?.currentProjects?.length) {
+        setProjects([]);
+        return;
+      }
+
+      try {
+        const projectPromises = user.currentProjects.map(async projectId => {
+          return (await getDoc(projectId as any)).data();
+        });
+
+        const resolvedProjects = await Promise.all(projectPromises);
+        setProjects(resolvedProjects.filter(Boolean) as Project[]);
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+        setProjects([]);
+      }
+    };
+
+    fetchProjects();
+  }, [user?.currentProjects]);
+
+  useEffect(() => {
+    const fetchSeatDetails = async (id: string) => {
+      const seatDetails = (await getDoc(user?.assignedSeat)).data();
+      setSeatDetails(seatDetails as Seat);
+    };
+
+    if (user?.assignedSeat) {
+      fetchSeatDetails(user?.assignedSeat);
+    }
+  }, [isLoading, user?.assignedSeat]);
+
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator />
+      </View>
+    );
+  }
 
   return (
     <Layout padding={20} scrollable>
@@ -41,7 +101,9 @@ const Home = () => {
               alignItems: 'center',
               marginRight: 12,
             }}>
-            <CustomText style={{ color: '#FFFFFF' }}>b</CustomText>
+            <CustomText style={{ color: '#FFFFFF' }}>
+              {user?.displayName[0] || 'B'}
+            </CustomText>
           </View>
           <View>
             <CustomText
@@ -57,7 +119,7 @@ const Home = () => {
                 color: appTheme.lightText,
                 fontSize: 14,
               }}>
-              Senior Developer
+              {user?.role}
             </CustomText>
           </View>
         </View>
@@ -76,7 +138,6 @@ const Home = () => {
           <Image src={AppImages.search} style={{ width: 20, height: 20 }} />
         </View>
       </View>
-
       {/* Current Seat Section */}
       <View
         style={[
@@ -98,7 +159,7 @@ const Home = () => {
             }}>
             CURRENT SEAT
           </CustomText>
-          <View
+          <Pressable
             style={{
               justifyContent: 'center',
               alignItems: 'center',
@@ -110,7 +171,7 @@ const Home = () => {
             <CustomText style={{ color: appTheme.themeColor }}>
               View on Map
             </CustomText>
-          </View>
+          </Pressable>
         </View>
         <View
           style={{
@@ -126,156 +187,127 @@ const Home = () => {
                 marginBottom: 4,
                 color: appTheme.text,
               }}>
-              B12
+              {seatDetails?.label + '-' + seatDetails?.floorName ||
+                'Not allocated'}
             </CustomText>
             <CustomText
               style={{
                 color: appTheme.lightText,
               }}>
-              2nd Floor, Engineering Zone
+              {user?.department}-Zone
             </CustomText>
           </View>
         </View>
       </View>
-
       {/* Current Project Section */}
-      <View
-        style={[
-          {
-            backgroundColor: appTheme.card,
-          },
-          styles.cardView,
-        ]}>
-        <CustomText
-          style={{
-            color: appTheme.lightText,
-            marginBottom: 8,
-          }}>
-          CURRENT PROJECT
-        </CustomText>
+      {(projects.length > 0 &&
+        projects.map((project, index) => {
+          return (
+            <View
+              key={`${project.id} + ${index}`}
+              style={[
+                {
+                  backgroundColor: appTheme.card,
+                },
+                styles.cardView,
+              ]}>
+              <CustomText
+                style={{
+                  color: appTheme.lightText,
+                  marginBottom: 8,
+                }}>
+                CURRENT PROJECT
+              </CustomText>
 
-        <CustomText
-          style={{
-            fontSize: 18,
-            fontWeight: 'bold',
-            marginBottom: 8,
-            color: appTheme.text,
-          }}>
-          Platform Dashboard Redesign
-        </CustomText>
+              <CustomText
+                style={{
+                  fontSize: 18,
+                  fontWeight: 'bold',
+                  marginBottom: 8,
+                  color: appTheme.text,
+                }}>
+                {project.name}
+              </CustomText>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
+                {project.techStack.map((skill, index) => {
+                  return (
+                    <View
+                      key={index}
+                      style={{
+                        backgroundColor: appTheme.background,
+                        alignSelf: 'flex-start',
+                        borderRadius: 16,
+                        paddingHorizontal: 12,
+                        paddingVertical: 4,
+                        marginBottom: 16,
+                      }}>
+                      <CustomText style={{ color: appTheme.themeColor }}>
+                        {skill}
+                      </CustomText>
+                    </View>
+                  );
+                })}
+              </View>
+              <View style={{ marginBottom: 30, gap: 10 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <CustomText
+                    style={{ color: appTheme.gray, fontWeight: '400' }}
+                    numberOfLines={3}>
+                    {project.description}
+                  </CustomText>
+                </View>
+              </View>
 
+              <CustomText
+                style={{
+                  color: appTheme.lightText,
+                  marginBottom: 8,
+                }}>
+                TEAM MEMBERS
+              </CustomText>
+
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                {['KL', 'MC', 'TR', 'AH'].map((initials, index) => (
+                  <View
+                    key={index}
+                    style={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: 16,
+                      backgroundColor: appTheme.themeColor,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      marginRight: 8,
+                    }}>
+                    <CustomText style={{ color: '#FFFFFF', fontSize: 12 }}>
+                      {initials}
+                    </CustomText>
+                  </View>
+                ))}
+                <CustomText style={{ color: appTheme.lightText }}>
+                  +3 more
+                </CustomText>
+              </View>
+            </View>
+          );
+        })) || (
         <View
-          style={{
-            backgroundColor: appTheme.background,
-            alignSelf: 'flex-start',
-            borderRadius: 16,
-            paddingHorizontal: 12,
-            paddingVertical: 4,
-            marginBottom: 16,
-          }}>
-          <CustomText style={{ color: appTheme.themeColor }}>
-            React Native
+          style={[
+            {
+              backgroundColor: appTheme.card,
+            },
+            styles.cardView,
+          ]}>
+          <CustomText
+            style={{
+              color: appTheme.lightText,
+
+              fontWeight: 'bold',
+            }}>
+            No project assigned
           </CustomText>
         </View>
-
-        <View style={{ marginBottom: 30, gap: 10 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <CustomText style={{ color: appTheme.text }}>PM: </CustomText>
-            <CustomText
-              style={{ color: appTheme.themeColor, fontWeight: '500' }}>
-              Karmaraj Vaghela
-            </CustomText>
-          </View>
-
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <CustomText style={{ color: appTheme.text }}>DOE: </CustomText>
-            <CustomText
-              style={{ color: appTheme.themeColor, fontWeight: '500' }}>
-              Vroksi Roy
-            </CustomText>
-          </View>
-        </View>
-
-        <CustomText
-          style={{
-            color: appTheme.lightText,
-            marginBottom: 8,
-          }}>
-          TEAM MEMBERS
-        </CustomText>
-
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          {['KL', 'MC', 'TR', 'AH'].map((initials, index) => (
-            <View
-              key={index}
-              style={{
-                width: 32,
-                height: 32,
-                borderRadius: 16,
-                backgroundColor: appTheme.themeColor,
-                justifyContent: 'center',
-                alignItems: 'center',
-                marginRight: 8,
-              }}>
-              <CustomText style={{ color: '#FFFFFF', fontSize: 12 }}>
-                {initials}
-              </CustomText>
-            </View>
-          ))}
-          <CustomText style={{ color: appTheme.lightText }}>+3 more</CustomText>
-        </View>
-
-        {/* 
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-around',
-            marginTop: 20,
-            alignItems: 'center',
-          }}>
-          <View
-            style={{
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-            <CustomText style={{ color: appTheme.text }}>
-              PROJECT MANAGER
-            </CustomText>
-            <View
-              style={{
-                width: 32,
-                height: 32,
-                borderRadius: 16,
-                backgroundColor: appTheme.themeColor,
-                justifyContent: 'center',
-                alignItems: 'center',
-                margin: 10,
-              }}>
-              <CustomText style={{ color: '#FFFFFF', fontSize: 12 }}>
-                HP
-              </CustomText>
-            </View>
-          </View>
-
-          <View style={{ alignItems: 'center' }}>
-            <CustomText style={{ color: appTheme.text }}>DOE</CustomText>
-            <View
-              style={{
-                width: 32,
-                height: 32,
-                borderRadius: 16,
-                backgroundColor: appTheme.themeColor,
-                justifyContent: 'center',
-                alignItems: 'center',
-                margin: 10,
-              }}>
-              <CustomText style={{ color: '#FFFFFF', fontSize: 12 }}>
-                JP
-              </CustomText>
-            </View>
-          </View>
-        </View> */}
-      </View>
+      )}
       {/* AI-Optimized Seat Section */}
       <View
         style={[

@@ -2166,6 +2166,16 @@
   dependencies:
     plist "^3.1.0"
 
+"@react-native-firebase/firestore@^21.13.0":
+  version "21.13.0"
+  resolved "https://registry.yarnpkg.com/@react-native-firebase/firestore/-/firestore-21.13.0.tgz#cff82b71693e23516bd1f819af8677340a36d48e"
+  integrity sha512-2fbr4VWp3x3Ej6BUUzvJ0xBLuMfT14t2QXAIIixbfvMLk3d9DkxdmgdRZaC2VKW9x47ts/iub4g0OPdoJN0Zpg==
+
+"@react-native-firebase/messaging@^21.13.0":
+  version "21.13.0"
+  resolved "https://registry.yarnpkg.com/@react-native-firebase/messaging/-/messaging-21.13.0.tgz#8cc3ba9fc14241f035868d74286e46d8484a8819"
+  integrity sha512-ZUc44XRPjVvg0os9TdcOB7GECewJXsEzsder8gJRgCrOL6wn96uAqqOOmzAja64SQeMxvnelbfOtDtwoltLCvA==
+
 "@react-native-masked-view/masked-view@^0.3.2":
   version "0.3.2"
   resolved "https://registry.yarnpkg.com/@react-native-masked-view/masked-view/-/masked-view-0.3.2.tgz#7064533a573e3539ec912f59c1f457371bf49dd9"

@@ -17,7 +17,6 @@ const Tab = createBottomTabNavigator();
 enum tabs {
   HomeTab = 'Home',
   OfficeMap = 'OfficeMap',
-  Project= 'Project',
   Profile = 'Profile',
 }
 
@@ -34,15 +33,10 @@ const TABS = [
     screen: OfficeMap,
     name: 'officeMap',
   },
-  {
-    title: tabs.Project,
-    icon: AppImages.project,
-    screen: Users,
-    name: 'user',
-  },
+
   {
     title: tabs.Profile,
-    icon: AppImages.user,
+    icon: AppImages.settings,
     screen: SettingsStack,
     name: 'setting',
   },

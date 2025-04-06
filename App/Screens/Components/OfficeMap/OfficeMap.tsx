@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { View, StyleSheet, TouchableOpacity, Pressable } from 'react-native';
 import {
   BottomModalContainer,
@@ -9,153 +9,201 @@ import {
 } from '@CommonComponent';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useAppContext } from '@AppContext';
+import firestore, { getDoc } from '@react-native-firebase/firestore';
+import { get } from 'axios';
+import { useGetDoc } from '../../../Hooks/useGetDoc';
+import { firebase } from '@react-native-firebase/auth';
 
-const rooms = [
-  {
-    id: 1,
-    room: '1501',
-    seats: 72,
-  },
-  {
-    id: 2,
-    room: '1502',
-    seats: 72,
-  },
-  {
-    id: 3,
-    room: '1503',
-    seats: 72,
-  },
-  {
-    id: 4,
-    room: '1504',
-    seats: 72,
-  },
-  {
-    id: 5,
-    room: '1601',
-    seats: 72,
-  },
-  {
-    id: 6,
-    room: '1602',
-    seats: 72,
-  },
-  {
-    id: 8,
-    room: '1603',
-    seats: 72,
-  },
-  {
-    id: 7,
-    room: '1604',
-    seats: 72,
-  },
-];
+interface Seat {
+  id: string;
+  status: 'available' | 'occupied';
+  label: string;
+  type: string;
+  zoneId: any;
+  floorName: string;
+  floorId: any;
+  lastModified: any;
+}
 
-const TOTAL_SEATS = 72;
-const SEATS_PER_DESK = 12; // 6 + 6
-const DESKS = TOTAL_SEATS / SEATS_PER_DESK;
-
-const generateDesks = () => {
-  const desks = [];
-  let seatNum = 1;
-  for (let d = 0; d < DESKS; d++) {
-    const topRow = [];
-    const bottomRow = [];
-    for (let i = 0; i < 6; i++) {
-      topRow.push({ id: seatNum, available: false });
-      seatNum++;
-    }
-    for (let i = 0; i < 6; i++) {
-      bottomRow.push({ id: seatNum, available: true });
-      seatNum++;
-    }
-    desks.push({ topRow, bottomRow });
-  }
-  return desks;
-};
+interface Floor {
+  id: string;
+  name: string;
+}
 
 export default function App() {
   const { appTheme } = useAppContext();
-  const desks = generateDesks();
   const [isShowModal, setShowModal] = useState(false);
-  const [selectedSeat, setSelectedSeat] = useState(null);
-  const [selectedFloorId, setSelectedFloorId] = useState(3);
+  const [selectedSeat, setSelectedSeat] = useState<any>();
+  const [selectedFloorId, setSelectedFloorId] = useState<string>();
 
-  const handleSeatPress = seat => {
-    setSelectedSeat(seat);
-    setShowModal(true);
+  const [seatData, setSeatData] = useState<Seat[]>([]);
+  const [floorList, setFloorList] = useState<Floor[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const getFloorList = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const snapshot = await firestore().collection('floors').get();
+      const floors = snapshot.docs.map(doc => ({
+        id: doc.id,
+        name: doc.data().name || '',
+        ...doc.data(),
+      })) as Floor[];
+      setFloorList(floors);
+      if (!selectedFloorId && floors.length > 0) {
+        setSelectedFloorId(floors[0].id);
+      }
+      return floors;
+    } catch (error) {
+      console.error('Error getting documents: ', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [selectedFloorId]);
+
+  useEffect(() => {
+    getFloorList();
+  }, [getFloorList]);
+
+  const getSeatsByFloor = useCallback(
+    async (floorId: string): Promise<void> => {
+      if (!floorId) return;
+
+      try {
+        setIsLoading(true);
+        const floorRef = firestore().collection('floors').doc(floorId);
+        const snapshot = await firestore()
+          .collection('seats')
+          .where('floorId', '==', floorRef)
+          .get();
+
+        const seats = snapshot.docs.map(doc => ({
+          id: doc.id,
+          status: doc.data().status || 'occupied',
+          label: doc.data().label || '',
+          type: doc.data().type || '',
+          zoneId: doc.data().zoneId,
+          floorName: doc.data().floorName || '',
+          floorId: doc.data().floorId,
+          lastModified: doc.data().lastModified,
+          ...doc.data(),
+        })) as Seat[];
+        setSeatData(
+          seats.sort((a, b) => parseInt(a.label) - parseInt(b.label)),
+        );
+      } catch (error) {
+        console.error(`Error getting seats for floor ${floorId}:`, error);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (selectedFloorId) {
+      getSeatsByFloor(selectedFloorId);
+    }
+  }, [selectedFloorId, getSeatsByFloor]);
+
+  const handleSeatPress = async (seat: Seat) => {
+    if (seat.status !== 'available') {
+      const userRef = (await getDoc(seat.assignedTo)).data();
+      setSelectedSeat({ ...seat, user: userRef });
+      setShowModal(true);
+    } else {
+      setSelectedSeat({ ...seat });
+      setShowModal(true);
+    }
   };
 
-  const RenderLayout = () => {
-    return desks.map((desk, index) => (
-      <View key={index} style={styles.deskBlock}>
-        <View style={styles.row}>
-          {desk.topRow.map(seat => (
-            <TouchableOpacity
-              key={seat.id}
-              style={[
-                styles.seat,
-                {
-                  backgroundColor: seat.available
-                    ? appTheme.card
-                    : appTheme.themeColor,
-                },
-              ]}
-              onPress={() => handleSeatPress(seat)}>
-              <CustomText
-                style={[
-                  styles.seatLabel,
-                  {
-                    color: seat.available ? appTheme.text : appTheme.background,
-                  },
-                ]}>
-                {seat.id}
-              </CustomText>
-            </TouchableOpacity>
-          ))}
-        </View>
-        <View
-          style={[
-            styles.divider,
-            {
-              backgroundColor: appTheme.textBorder,
-              borderColor: appTheme.gray,
-            },
-          ]}
-        />
-        <View style={styles.row}>
-          {desk.bottomRow.map(seat => (
-            <TouchableOpacity
-              key={seat.id}
-              style={[
-                styles.seat,
-                {
-                  backgroundColor: seat.available
-                    ? appTheme.border
-                    : appTheme.themeColor,
-                },
-              ]}
-              onPress={() => handleSeatPress(seat)}>
-              <CustomText
-                style={[
-                  styles.seatLabel,
-                  {
-                    color: seat.available
-                      ? appTheme.lightText
-                      : appTheme.background,
-                  },
-                ]}>
-                {seat.id}
-              </CustomText>
-            </TouchableOpacity>
-          ))}
-        </View>
+  const RenderSeats = () => {
+    // Group seats by their label numbers to create rows
+    const groupedSeats = seatData.reduce(
+      (acc, seat) => {
+        const rowNumber = Math.ceil(parseInt(seat.label) / 12);
+        if (!acc[rowNumber]) {
+          acc[rowNumber] = [];
+        }
+        acc[rowNumber].push(seat);
+        return acc;
+      },
+      {} as Record<number, Seat[]>,
+    );
 
-        <View style={styles.passage} />
-      </View>
-    ));
+    const getSeatColor = (status: string) => {
+      return status !== 'available' ? appTheme.themeColor : appTheme.gray;
+    };
+
+    const getSeatTextColor = (status: string) => {
+      // return status !== 'available' ? appTheme.background : appTheme.background;
+      return '#fff';
+    };
+
+    return (
+      <>
+        {Object.entries(groupedSeats).map(([rowIndex, seats]) => (
+          <View key={rowIndex} style={styles.deskBlock}>
+            <View style={styles.row}>
+              {seats.slice(0, 6).map(seat => (
+                <TouchableOpacity
+                  key={seat.id}
+                  style={[
+                    styles.seat,
+                    {
+                      backgroundColor: getSeatColor(seat.status),
+                    },
+                  ]}
+                  onPress={() => handleSeatPress(seat)}>
+                  <CustomText
+                    style={[
+                      styles.seatLabel,
+                      {
+                        color: getSeatTextColor(seat.status),
+                      },
+                    ]}>
+                    {seat.label}
+                  </CustomText>
+                </TouchableOpacity>
+              ))}
+            </View>
+            <View
+              style={[
+                styles.divider,
+                {
+                  backgroundColor: appTheme.textBorder,
+                  borderColor: appTheme.gray,
+                },
+              ]}
+            />
+            <View style={styles.row}>
+              {seats.slice(6, 12).map(seat => (
+                <TouchableOpacity
+                  key={seat.id}
+                  style={[
+                    styles.seat,
+                    {
+                      backgroundColor: getSeatColor(seat.status),
+                    },
+                  ]}
+                  onPress={() => handleSeatPress(seat)}>
+                  <CustomText
+                    style={[
+                      styles.seatLabel,
+                      {
+                        color: getSeatTextColor(seat.status),
+                      },
+                    ]}>
+                    {seat.label}
+                  </CustomText>
+                </TouchableOpacity>
+              ))}
+            </View>
+            <View style={styles.passage} />
+          </View>
+        ))}
+      </>
+    );
   };
 
   return (
@@ -168,21 +216,20 @@ export default function App() {
         </CustomText>
         <View style={[styles.floorPickerContainer]}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {rooms.map(room => (
+            {floorList?.map(floor => (
               <Pressable
-                onPress={() => setSelectedFloorId(room.id)}
-                key={room.id}
+                onPress={() => setSelectedFloorId(floor.id)}
+                key={floor.id}
                 style={{
-                  borderWidth: selectedFloorId === room.id ? 1 : 0.5,
+                  borderWidth: selectedFloorId === floor.id ? 1 : 0.5,
                   borderColor:
-                    selectedFloorId === room.id
+                    selectedFloorId === floor.id
                       ? appTheme.themeColor
                       : appTheme.gray,
                   backgroundColor:
-                    selectedFloorId === room.id
+                    selectedFloorId === floor.id
                       ? appTheme.themeColor
                       : appTheme.card,
-
                   paddingVertical: 5,
                   borderRadius: 5,
                   paddingHorizontal: 10,
@@ -192,12 +239,13 @@ export default function App() {
                   small
                   style={{
                     color:
-                      selectedFloorId === room.id
+                      selectedFloorId === floor.id
                         ? appTheme.background
                         : appTheme.text,
-                    fontWeight: selectedFloorId === room.id ? 'bold' : 'normal',
+                    fontWeight:
+                      selectedFloorId === floor.id ? 'bold' : 'normal',
                   }}>
-                  {room.room}
+                  {floor.name}
                 </CustomText>
               </Pressable>
             ))}
@@ -208,7 +256,7 @@ export default function App() {
       <View style={{ height: 10 }} />
 
       <View style={[styles.mapContainer, { backgroundColor: appTheme.card }]}>
-        <RenderLayout desks={desks} />
+        <RenderSeats />
       </View>
 
       <TeamView
@@ -218,12 +266,27 @@ export default function App() {
       />
 
       <BottomModalContainer
-        title={`Seat #${selectedSeat?.id}`}
+        title={`Seat #${selectedSeat?.label}`}
         onClose={() => setShowModal(false)}
         show={isShowModal}>
-        <CustomText large>
-          Status: {selectedSeat?.available ? '✅ Available' : '❌ Occupied'}
-        </CustomText>
+        <View style={{ gap: 10, paddingHorizontal: 10 }}>
+          <CustomText large style={{ fontWeight: 'bold' }}>
+            Status:{' '}
+            {selectedSeat?.status === 'available' ? 'Available' : 'Occupied'}
+          </CustomText>
+          {selectedSeat?.user && (
+            <>
+              <CustomText large style={{ fontWeight: 'bold' }}>
+                Employee ID: {selectedSeat?.user?.employeeId}
+              </CustomText>
+              <CustomText medium>
+                Name: {selectedSeat?.user?.displayName}
+              </CustomText>
+              <CustomText medium>Email: {selectedSeat?.user?.email}</CustomText>
+              <CustomText medium>Role: {selectedSeat?.user?.role}</CustomText>
+            </>
+          )}
+        </View>
         <View style={styles.modalSpacing} />
       </BottomModalContainer>
     </Layout>
