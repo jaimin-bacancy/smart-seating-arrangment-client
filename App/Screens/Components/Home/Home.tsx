@@ -3,11 +3,12 @@ import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
+  Pressable,
   RefreshControl,
   StyleSheet,
   View,
 } from 'react-native';
-import firestore, { getDoc } from '@react-native-firebase/firestore';
+import { getDoc } from '@react-native-firebase/firestore';
 
 import {
   CustomText,
@@ -28,6 +29,8 @@ const Home = () => {
   const isFocused = useIsFocused();
   const [projects, setProjects] = useState<Project[]>([]);
   const [seatDetails, setSeatDetails] = useState<Seat | null>(null);
+
+  console.log('seatDetails:00->  ', seatDetails);
 
   const {
     data: user,
@@ -55,20 +58,19 @@ const Home = () => {
       }
     };
 
-    const fetchSeatDetails = async () => {
-      const seatDetails = await getDoc(user?.assignedSeat as any);
-      setSeatDetails(seatDetails.data() as Seat);
-      console.log('seatDetails: ', JSON.stringify(seatDetails.data()));
-    };
-
-    console.log('user?.assignedSeat: ', user?.assignedSeat);
-
-    if (user?.assignedSeat) {
-      fetchSeatDetails();
-    }
-
     fetchProjects();
   }, [user?.currentProjects]);
+
+  useEffect(() => {
+    const fetchSeatDetails = async (id: string) => {
+      const seatDetails = (await getDoc(user?.assignedSeat)).data();
+      setSeatDetails(seatDetails as Seat);
+    };
+
+    if (user?.assignedSeat) {
+      fetchSeatDetails(user?.assignedSeat);
+    }
+  }, [isLoading, user?.assignedSeat]);
 
   if (isLoading) {
     return (
@@ -99,7 +101,9 @@ const Home = () => {
               alignItems: 'center',
               marginRight: 12,
             }}>
-            <CustomText style={{ color: '#FFFFFF' }}>b</CustomText>
+            <CustomText style={{ color: '#FFFFFF' }}>
+              {user?.displayName[0] || 'B'}
+            </CustomText>
           </View>
           <View>
             <CustomText
@@ -155,7 +159,7 @@ const Home = () => {
             }}>
             CURRENT SEAT
           </CustomText>
-          <View
+          <Pressable
             style={{
               justifyContent: 'center',
               alignItems: 'center',
@@ -167,7 +171,7 @@ const Home = () => {
             <CustomText style={{ color: appTheme.themeColor }}>
               View on Map
             </CustomText>
-          </View>
+          </Pressable>
         </View>
         <View
           style={{
@@ -183,23 +187,24 @@ const Home = () => {
                 marginBottom: 4,
                 color: appTheme.text,
               }}>
-              Not allocated
+              {seatDetails?.label + '-' + seatDetails?.floorName ||
+                'Not allocated'}
             </CustomText>
             <CustomText
               style={{
                 color: appTheme.lightText,
               }}>
-              2nd Floor, {user?.department}-Zone
+              {user?.department}-Zone
             </CustomText>
           </View>
         </View>
       </View>
       {/* Current Project Section */}
       {(projects.length > 0 &&
-        projects.map(project => {
+        projects.map((project, index) => {
           return (
             <View
-              key={project.id}
+              key={`${project.id} + ${index}`}
               style={[
                 {
                   backgroundColor: appTheme.card,

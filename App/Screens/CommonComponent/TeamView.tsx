@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { useAppContext } from '@AppContext';
+import { CustomText } from './CustomText';
 
 type Team = {
   name: string;
@@ -18,13 +19,13 @@ const TeamView = ({ onClusterPress }: { onClusterPress?: () => void }) => {
 
   return (
     <View style={[styles.container, { backgroundColor: appTheme.card }]}>
-      <Text style={styles.header}>Teams</Text>
+      <CustomText style={styles.header}>Teams</CustomText>
 
       <View style={styles.legendWrapper}>
         {teams.map((team, index) => (
           <View key={index} style={styles.legendRow}>
             <View style={[styles.dot, { backgroundColor: team.color }]} />
-            <Text style={styles.label}>{team.name}</Text>
+            <CustomText style={styles.label}>{team.name}</CustomText>
           </View>
         ))}
       </View>
@@ -34,9 +35,11 @@ const TeamView = ({ onClusterPress }: { onClusterPress?: () => void }) => {
         onPress={onClusterPress}
         activeOpacity={0.8}>
         <View style={styles.aiBadge}>
-          <Text style={styles.aiText}>AI</Text>
+          <CustomText style={styles.aiText}>AI</CustomText>
         </View>
-        <Text style={styles.buttonText}>Show AI-Optimized Clusters</Text>
+        <CustomText style={styles.buttonText}>
+          Show AI-Optimized Clusters
+        </CustomText>
       </TouchableOpacity>
     </View>
   );
@@ -55,7 +58,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     marginBottom: 12,
-    color: '#000',
   },
   legendWrapper: {
     flexDirection: 'row',
@@ -74,10 +76,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     marginRight: 8,
   },
-  label: {
-    fontSize: 16,
-    color: '#333',
-  },
+  label: {},
   clusterButton: {
     flexDirection: 'row',
     alignItems: 'center',
