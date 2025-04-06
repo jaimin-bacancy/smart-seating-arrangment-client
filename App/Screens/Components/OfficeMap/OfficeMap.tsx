@@ -33,7 +33,7 @@ interface Floor {
 export default function App() {
   const { appTheme } = useAppContext();
   const [isShowModal, setShowModal] = useState(false);
-  const [selectedSeat, setSelectedSeat] = useState<Seat | null>();
+  const [selectedSeat, setSelectedSeat] = useState<any>();
   const [selectedFloorId, setSelectedFloorId] = useState<string>();
 
   const [seatData, setSeatData] = useState<Seat[]>([]);
@@ -107,10 +107,14 @@ export default function App() {
   }, [selectedFloorId, getSeatsByFloor]);
 
   const handleSeatPress = async (seat: Seat) => {
-    const userRef = (await getDoc(seat.assignedTo)).data();
-
-    setSelectedSeat({ ...seat, user: userRef });
-    setShowModal(true);
+    if (seat.status !== 'available') {
+      const userRef = (await getDoc(seat.assignedTo)).data();
+      setSelectedSeat({ ...seat, user: userRef });
+      setShowModal(true);
+    } else {
+      setSelectedSeat({ ...seat });
+      setShowModal(true);
+    }
   };
 
   const RenderSeats = () => {
@@ -270,14 +274,18 @@ export default function App() {
             Status:{' '}
             {selectedSeat?.status === 'available' ? 'Available' : 'Occupied'}
           </CustomText>
-          <CustomText large style={{ fontWeight: 'bold' }}>
-            Employee ID: {selectedSeat?.user?.employeeId}
-          </CustomText>
-          <CustomText medium>
-            Name: {selectedSeat?.user?.displayName}
-          </CustomText>
-          <CustomText medium>Email: {selectedSeat?.user?.email}</CustomText>
-          <CustomText medium>Role: {selectedSeat?.user?.role}</CustomText>
+          {selectedSeat?.user && (
+            <>
+              <CustomText large style={{ fontWeight: 'bold' }}>
+                Employee ID: {selectedSeat?.user?.employeeId}
+              </CustomText>
+              <CustomText medium>
+                Name: {selectedSeat?.user?.displayName}
+              </CustomText>
+              <CustomText medium>Email: {selectedSeat?.user?.email}</CustomText>
+              <CustomText medium>Role: {selectedSeat?.user?.role}</CustomText>
+            </>
+          )}
         </View>
         <View style={styles.modalSpacing} />
       </BottomModalContainer>
